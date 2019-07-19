@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=iShop123
+      - POSTGRES_DB=snapeda
+    volumes:
+      - postgres_snapeda_data:/var/lib/postgresql/data/
+  web:
+    container_name: snapeda
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      - ENVIRONMENT=local
+    env_file:
+      - .env
+    volumes:
+      - .:/code
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - elastic
+    links:
+      - db
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
+    ports:
+      - 9200:9200
+      - 9300:9300
+    expose:
+      - "9200"
+      - "9300"
+
+volumes:
+  postgres_snapeda_data:
